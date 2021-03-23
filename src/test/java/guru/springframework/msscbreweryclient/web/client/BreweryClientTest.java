@@ -15,7 +15,7 @@ public class BreweryClientTest {
 
     @Autowired
     BreweryClient client;
-
+// HTTP GET Spring Boot Rest Template
     @Test
     void getBeerById() {
         BeerDto dto = client.getBeerById(UUID.randomUUID());
@@ -23,4 +23,11 @@ public class BreweryClientTest {
         assertNotNull(dto);
 
     }
+
+    public URI saveNewBeer(BeerDto beerDto){
+        return restTemplate.postForLocation(apihost + BEER_PATH_V1, beerDto);
+    }
+
+
+
 }
