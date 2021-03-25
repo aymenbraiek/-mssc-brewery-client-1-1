@@ -14,9 +14,10 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class BlockingRestTemplateCustomizer implements RestTemplateCustomizer {
-    public ClientHttpRequestFactory clientHttpRequestFactory(){
+    // line 17-37 the Apache sepecific stuff
+    public ClientHttpRequestFactory clientHttpRequestFactory() {
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(100);
+        connectionManager.setMaxTotal(100); // connection manager max 100
         connectionManager.setDefaultMaxPerRoute(20);
 
         RequestConfig requestConfig = RequestConfig
@@ -36,10 +37,10 @@ public class BlockingRestTemplateCustomizer implements RestTemplateCustomizer {
     }
 
 
-
+    //inject RestTemplate
     @Override
     public void customize(RestTemplate restTemplate) {
         restTemplate.setRequestFactory(this.clientHttpRequestFactory());
     }
-    }
+}
 
