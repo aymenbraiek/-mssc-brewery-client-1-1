@@ -1,6 +1,7 @@
 package guru.springframework.msscbreweryclient.web.config;
 
 
+import lombok.Value;
 import org.springframework.stereotype.Component;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.impl.client.CloseableHttpClient;
@@ -14,16 +15,31 @@ import org.springframework.web.client.RestTemplate;
 
 @Component
 public class BlockingRestTemplateCustomizer implements RestTemplateCustomizer {
-    // line 17-37 the Apache sepecific stuff
-    public ClientHttpRequestFactory clientHttpRequestFactory() {
+
+    private final Integer maxTotalConnections;
+    private final Integer defaultMaxTotalConnetions;
+    private final Integer connectionRequestTimeout;
+    private final Integer socketTimeout;
+
+    public BlockingRestTemplateCustomizer(@Value("${sfg.maxtotalconnections}") Integer maxTotalConnections,
+                                          @Value("${sfg.defaultmaxtotalconnections}") Integer defaultMaxTotalConnetions,
+                                          @Value("${sfg.connectionrequesttimeout}")Integer connectionRequestTimeout,
+                                          @Value("${sfg.sockettimeout}")Integer socketTimeout) {
+        this.maxTotalConnections = maxTotalConnections;
+        this.defaultMaxTotalConnetions = defaultMaxTotalConnetions;
+        this.connectionRequestTimeout = connectionRequestTimeout;
+        this.socketTimeout = socketTimeout;
+    }
+    // line 17-37 the Apache specific stuff
+    public ClientHttpRequestFactory clientHttpRequestFactory(){
         PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager();
-        connectionManager.setMaxTotal(100); // connection manager max 100
-        connectionManager.setDefaultMaxPerRoute(20);
+        connectionManager.setMaxTotal(maxTotalConnections);
+        connectionManager.setDefaultMaxPerRoute(defaultMaxTotalConnetions);
 
         RequestConfig requestConfig = RequestConfig
                 .custom()
-                .setConnectionRequestTimeout(3000)
-                .setSocketTimeout(3000)
+                .setConnectionRequestTimeout(connectionRequestTimeout)
+                .setSocketTimeout(socketTimeout)
                 .build();
 
         CloseableHttpClient httpClient = HttpClients
@@ -36,8 +52,6 @@ public class BlockingRestTemplateCustomizer implements RestTemplateCustomizer {
         return new HttpComponentsClientHttpRequestFactory(httpClient);
     }
 
-
-    //inject RestTemplate
     @Override
     public void customize(RestTemplate restTemplate) {
         restTemplate.setRequestFactory(this.clientHttpRequestFactory());
